@@ -1,0 +1,11 @@
+{
+  "name": "pp-file-creator-server",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "repository": "https://github.com/kevindoveton/pp-file-creator-server",
+  "author": "Kevin Doveton <kevindoveton@me.com>",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.15.2"
+  }
+}
