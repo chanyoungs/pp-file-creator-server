@@ -4,27 +4,16 @@
  * Module dependencies.
  */
 
-var app = require('./webserver/app');
-var debug = require('debug')('test:server');
-var http = require('http');
+const app = require('./webserver/app');
+const debug = require('debug')('debug:server');
+const http = require('http');
 
-/**
- * Get port from environment and store in Express.
- */
 
+// Get port from environment and store in Express.
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
-/**
- * Create HTTP server.
- */
-
 var server = http.createServer(app);
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
@@ -37,13 +26,11 @@ function normalizePort(val) {
   var port = parseInt(val, 10);
 
   if (isNaN(port)) {
-    // named pipe
-    return val;
+    return val; // named pipe
   }
 
   if (port >= 0) {
-    // port number
-    return port;
+    return port; // port number
   }
 
   return false;
@@ -87,4 +74,5 @@ function onListening() {
     ? 'pipe ' + addr
     : 'port ' + addr.port;
   debug('Listening on ' + bind);
+
 }
