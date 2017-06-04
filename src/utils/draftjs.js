@@ -20,12 +20,13 @@ class DraftJS {
   
   static toRtfData(draftObj) {
     var data = [];
+
     
     if (typeof(draftObj) == 'undefined') {
       throw new Error('draftObj must be defined');
     }
     
-    const d = draftObj; 
+    const d = draftObj.blocks; 
     
     for (var i = 0; i < d.length; i++) {
       var output = d[i].text;
@@ -36,6 +37,7 @@ class DraftJS {
 
         const startPosition = styleRange.offset + extraPos;
         var startText = '';
+        var endText = '';
           
         // TODO: make this one switch
         switch(styleRange.style) {
@@ -46,12 +48,12 @@ class DraftJS {
           
           case "ITALIC":
             startText = STYLES.ITALIC.START;
-            insertText = STYLES.ITALIC.END;
+            endText = STYLES.ITALIC.END;
             break;
             
           case "UNDERLINE":
             startText = STYLES.UNDERLINE.START;
-            insertText = STYLES.UNDERLINE.END;
+            endText = STYLES.UNDERLINE.END;
             break;
           
           default:
@@ -66,9 +68,13 @@ class DraftJS {
         output = [output.slice(0, startPosition), startText, output.slice(startPosition)].join('');
         
         // end
-        output = [output.slice(0, endPosition), insertText, output.slice(endPosition)].join('');
+        output = [output.slice(0, endPosition), endText, output.slice(endPosition)].join('');
       }
       data.push(output);
     }
+    return data;
   }
 }
+
+
+module.exports = DraftJS

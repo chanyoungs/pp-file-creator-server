@@ -15,70 +15,8 @@ router.get('/', (req, res) => {
 });
 
 router.post('/parse', (req, res) => {
-
-  var data = [];
-
-  if (typeof(req.body.state.blocks) !== 'undefined') {
-    const d = req.body.state.blocks; 
-    for (var i = 0; i < d.length; i++) {
-      var output = d[i].text;
-      var extraPos = 0;
-      for (var j = 0; j < d[i].inlineStyleRanges.length; j++) {
-        const styleRange = d[i].inlineStyleRanges[j];
-        
-        var position = d[i].inlineStyleRanges[j].offset + extraPos;
-        var insertText = '';
-        
-        // TODO: make this one switch
-        switch(styleRange.style) {
-          case "BOLD":
-            insertText = STYLES.BOLD.START;
-            extraPos += insertText.length;
-            break;
-          
-          case "ITALIC":
-            insertText = STYLES.ITALIC.START;
-            extraPos += insertText.length;
-            break;
-            
-          case "UNDERLINE":
-            insertText = STYLES.UNDERLINE.START;
-            extraPos += insertText.length;
-            break;
-          
-          default:
-            break;
-        }
-        
-        output = [output.slice(0, position), insertText, output.slice(position)].join('');
-        
-        position += d[i].inlineStyleRanges[j].length + extraPos;
-        switch(styleRange.style) {
-          case "BOLD":
-            insertText = STYLES.BOLD.END;
-            extraPos += insertText.length;
-            break;
-          
-          case "ITALIC":
-            insertText = STYLES.ITALIC.END;
-            extraPos += insertText.length;
-            break;
-          
-          case "UNDERLINE":
-            insertText = STYLES.UNDERLINE.END;
-            extraPos += insertText.length;
-            break;
-          
-          default:
-            break;
-        }
-        
-        output = [output.slice(0, position), insertText, output.slice(position)].join('');
-      }
-      data.push(output);
-    }
-  }
-
+  const { toRtfData } = require('../../../utils/draftjs')
+  var data = toRtfData(req.body.state)
   res.status(201).send(data);
 });
 
