@@ -1,18 +1,3 @@
-const STYLES = {
-  BOLD: {
-    START: '<b>',
-    END: '</b>'
-  },
-  ITALIC: {
-    START: '<i>',
-    END: '</i>'
-  },
-  UNDERLINE: {
-    START: '<u>',
-    END: '</u>'
-  },
-}
-
 const router = require('express').Router();
 
 const AuthMiddleware = require('./auth/AuthMiddleware');
