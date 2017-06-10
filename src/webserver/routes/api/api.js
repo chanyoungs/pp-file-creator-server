@@ -1,14 +1,23 @@
+const CORS_WHITELIST = ['/^(https?:\/\/)?localhost(:\d+)?$/', 'http://localhost:3000']
+
 const router = require('express').Router();
 
 const AuthMiddleware = require('./auth/AuthMiddleware');
 router.use(AuthMiddleware);
 
+const cors = require('cors');
+router.use(cors({
+  origin: CORS_WHITELIST
+}));
+
 const bodyParser = require('body-parser');
 router.use(bodyParser.json());
 
-
 const auth = require('./auth/auth');
 router.use('/auth', auth);
+
+const files = require('./files/files');
+router.use('/files', files);
 
 router.get('/', (req, res) => {
   res.send('api v1')
