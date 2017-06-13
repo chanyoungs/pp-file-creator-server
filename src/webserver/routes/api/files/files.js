@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const ProPresenter = require('../../../../utils/ProPresenter');
 
 // Connection URL
 const url = 'mongodb://localhost:27017/sermoncreator';
@@ -15,13 +16,20 @@ var MongoClient = require('mongodb').MongoClient
 // });
 
 router.post('/', (req, res) => {
-  
+
   console.log(req.body)
-  const { toRtfData } = require('../../../utils/draftjs')
-  // var data = toRtfData(req.body.slides)
-  // res.status(201).send(data);
-  
-  res.send('success');
+
+  // var templateStart = 
+
+  for (var i = 0; i < req.body.slides.length; i++) {
+    const slide = req.body.slides[i];
+    let rtfData = ProPresenter.ConvertHtmlToRtf(slide.htmlContent);
+
+  }
+
+  return res.json({
+    success: true
+  });
 })
 
 module.exports = router;
