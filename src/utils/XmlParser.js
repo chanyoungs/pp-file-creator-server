@@ -8,16 +8,18 @@ class XmlParser {
     this.filePath = filePath;
   }
   
-  getObject() {
+  getObject(cb) {
     fs.readFile(this.filePath, function(err, data) {
       parser.parseString(data, function (err, result) {
-        return result;
+        return cb(result);
       })
     })
   }
   
-  getJSON() {
-    return JSON.stringify(this.getObject());
+  getJSON(cb) {
+    this.getObject((result) => {
+      return cb(JSON.stringify(result));
+    })
   }
   
   static build(obj) {
@@ -28,4 +30,8 @@ class XmlParser {
   }
 }
 
+// var x = new XmlParser(process.cwd() + '/Docs/Template.pro5Template');
+// x.getJSON((res) => {
+//   console.log(res);
+// })
 module.exports = XmlParser;

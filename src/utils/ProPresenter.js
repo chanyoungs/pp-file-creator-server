@@ -16,12 +16,14 @@ class ProPresenter {
       "{\\pard \\brdrb \\brdrs \\brdrw10 \\brsp20 \\par}\n{\\pard\\par}\n"
     );
     richText = richText.replace(/<(?:br)(?:\s+[^>]*)?\s*[\/]?>/ig,
-      "{\\pard\\par}\n");
+      // "{\\pard\\par}\n");
+      "\\\n"); // NOTE: kevin added
 
     // Empty tags
     richText = richText.replace(
       /<(?:p|div|section|article)(?:\s+[^>]*)?\s*[\/]>/ig,
       "{\\pard\\par}\n");
+      
     richText = richText.replace(/<(?:[^>]+)\/>/g, "");
 
     // Hyperlinks
@@ -49,13 +51,13 @@ class ProPresenter {
     richText = richText.replace(/<sup(?:\s+[^>]*)?>/ig,
       "{\\super\n");
     richText = richText.replace(/<sub(?:\s+[^>]*)?>/ig, "{\\sub\n");
-    richText = richText.replace(
-      /<(?:p|div|section|article)(?:\s+[^>]*)?>/ig, "{\\pard\n");
+    // richText = richText.replace(
+    //   /<(?:p|div|section|article)(?:\s+[^>]*)?>/ig, "{\\pard\n");
 
     // End tags
-    richText = richText.replace(
-      /<\/(?:p|div|section|article)(?:\s+[^>]*)?>/ig,
-      "\n\\par}\n");
+    // richText = richText.replace(
+    //   /<\/(?:p|div|section|article)(?:\s+[^>]*)?>/ig,
+    //   "\n\\par}\n");
     richText = richText.replace(
       /<\/(?:b|strong|i|em|u|ins|strike|del|sup|sub)(?:\s+[^>]*)?>/ig,
       "\n}");

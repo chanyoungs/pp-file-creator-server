@@ -1,3 +1,4 @@
+// TODO: figure out cors
 const CORS_WHITELIST = ['/^(https?:\/\/)?localhost(:\d+)?$/', 'http://localhost:3000']
 
 const router = require('express').Router();

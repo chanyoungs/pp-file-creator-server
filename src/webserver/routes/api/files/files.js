@@ -8,6 +8,10 @@ String.prototype.rtrim = function() {
 	return this.replace(/\s+$/,"");
 }
 
+function copyObj(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
 const router = require('express').Router();
 const ProPresenter = require('../../../../utils/ProPresenter');
 const XmlParser = require('../../../../utils/XmlParser');
@@ -53,7 +57,8 @@ router.post('/', (req, res) => {
   rtfStart = rtfStart.substring(0, pos+5);
   
   // get a starting point
-  const BASE_SLIDE = (JSON.stringify(d['groups'][0]['RVSlideGrouping'][0]['slides'][0]['RVDisplaySlide'][0]))
+  // const BASE_SLIDE = d['groups'][0]['RVSlideGrouping'][0]['slides'][0]['RVDisplaySlide'][0];
+  const BASE_SLIDE = t['slides'][0]['RVDisplaySlide'][0];
   // TODO: remove all other slides properly
   slidesGroup = [];
   
@@ -62,9 +67,10 @@ router.post('/', (req, res) => {
     const slide = req.body.slides[i];
     let rtfData = ProPresenter.ConvertHtmlToRtf(slide.htmlContent);
 
-    let proSlide = JSON.parse(BASE_SLIDE);
+    let proSlide = copyObj(BASE_SLIDE);
     rtfData = rtfStart + rtfData + '}';
     rtfEncoded = ProPresenter.encode(rtfData);
+    console.log(rtfData);
     proSlide['$']['sort_index'] = i;
     proSlide['$']['serialization-array-index'] = i;
     proSlide['$']['label'] = 'slide ' + i;
