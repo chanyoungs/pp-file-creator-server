@@ -7,7 +7,7 @@ router.use(AuthMiddleware);
 
 const cors = require('cors');
 router.use(cors({
-  origin: CORS_WHITELIST
+  // origin: CORS_WHITELIST
 }));
 
 const bodyParser = require('body-parser');
