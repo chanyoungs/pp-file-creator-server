@@ -12,12 +12,19 @@ class XmlParser {
     fs.readFile(this.filePath, function(err, data) {
       parser.parseString(data, function (err, result) {
         return result;
-      }
-    }
+      })
+    })
   }
   
   getJSON() {
     return JSON.stringify(this.getObject());
+  }
+  
+  static build(obj) {
+    const builder = new xml2js.Builder({
+      headless: true
+    });
+    return builder.buildObject(obj);
   }
 }
 
