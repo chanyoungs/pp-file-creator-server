@@ -1,5 +1,8 @@
 // TODO: figure out cors
-const CORS_WHITELIST = ['/^(https?:\/\/)?localhost(:\d+)?$/', 'http://localhost:3000']
+const CORS_WHITELIST = [
+  /^(https?:\/\/)?localhost(:\d+)?$/,
+  /^(https?:\/\/)?kdoveton\.com(:\d+)?$/
+]
 
 const router = require('express').Router();
 
@@ -8,7 +11,7 @@ router.use(AuthMiddleware);
 
 const cors = require('cors');
 router.use(cors({
-  // origin: CORS_WHITELIST
+  origin: CORS_WHITELIST
 }));
 
 const bodyParser = require('body-parser');

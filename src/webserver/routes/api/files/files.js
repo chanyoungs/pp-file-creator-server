@@ -32,8 +32,10 @@ var MongoClient = require('mongodb').MongoClient
 // });
 
 router.post('/', (req, res) => {
-
-  // console.log(req.body)
+  console.log(req.body)
+  if (!req.body || typeof(req.body.slides) == 'undefined') {
+    return res.status(400).send('request format invalid');
+  }
   
   var template = undefined, doc = undefined;
   

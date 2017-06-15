@@ -11,18 +11,22 @@ class ProPresenter {
     var tmpRichText, hasHyperlinks;
     var richText = html;
 
+    richText = richText.replace(/<p><br( )?\/><\/p>/ig, ""); // NOTE: kevin added
+    richText = richText.replace('</p><p>', "\\\n"); // NOTE: kevin added
+
     // Singleton tags
     richText = richText.replace(/<(?:hr)(?:\s+[^>]*)?\s*[\/]?>/ig,
       "{\\pard \\brdrb \\brdrs \\brdrw10 \\brsp20 \\par}\n{\\pard\\par}\n"
     );
     richText = richText.replace(/<(?:br)(?:\s+[^>]*)?\s*[\/]?>/ig,
-      // "{\\pard\\par}\n");
+      // "{\\pard\\par}\n"); // NOTE: kevin removed
       "\\\n"); // NOTE: kevin added
 
     // Empty tags
     richText = richText.replace(
       /<(?:p|div|section|article)(?:\s+[^>]*)?\s*[\/]>/ig,
-      "{\\pard\\par}\n");
+      // "{\\pard\\par}\n"); // NOTE: kevin removed
+      "\\\n"); // NOTE: kevin added
       
     richText = richText.replace(/<(?:[^>]+)\/>/g, "");
 
@@ -52,7 +56,8 @@ class ProPresenter {
       "{\\super\n");
     richText = richText.replace(/<sub(?:\s+[^>]*)?>/ig, "{\\sub\n");
     // richText = richText.replace(
-    //   /<(?:p|div|section|article)(?:\s+[^>]*)?>/ig, "{\\pard\n");
+      // /<(?:p|div|section|article)(?:\s+[^>]*)?>/ig, "{\\pard\n"); // NOTE: kevin removed
+      // /<(?:p|div|section|article)(?:\s+[^>]*)?>/ig, "\\\n"); // NOTE: Kevin added
 
     // End tags
     // richText = richText.replace(
