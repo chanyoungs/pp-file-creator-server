@@ -1,7 +1,7 @@
 // TODO: figure out cors
 const CORS_WHITELIST = [
   /^(https?:\/\/)?localhost(:\d+)?$/,
-  /^(https?:\/\/)?kdoveton\.com(:\d+)?$/
+  /^(http(s)?:\/\/)(.*\.)?kdoveton\.com(:\d+)?$/
 ]
 
 const router = require('express').Router();
