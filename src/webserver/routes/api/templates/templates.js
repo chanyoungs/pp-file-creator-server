@@ -14,7 +14,10 @@ mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/pp-file-creator');
 
 const TEMPLATE_SCHEMA = mongoose.Schema({
-  template: Object
+  slide: Object,
+  width: Number,
+  height: Number,
+  backgroundColor: String
 });
 const Template = mongoose.model('Card', TEMPLATE_SCHEMA)
 
@@ -62,27 +65,33 @@ router.post('/', upload.single('template'), (req, res) => {
       const folder = path.join(req.file.destination, '_'+req.file.filename);
       const p = path.join(folder, name);
       
-      fs.mkdir(folder, 0777, (err) => {
-        if (err) {
-          return res.status(500).send();
-        };
-        //entry.pipe(fs.createWriteStream(p))
-        
-        // TODO: check we have memory - object isnt huge etc
-        streamToString(entry, (data) => {
-          
-          XmlParser.parseString(data, (result) => {
-            const t = new Template({
-              template: JSON.stringify(result)
+      // TODO: check we have memory - object isnt huge etc
+      streamToString(entry, (data) => {
+        XmlParser.parseString(data, (result) => {
+          const template = result['RVTemplateDocument'];
+          const templateHeight = template['$']['height'];
+          const templateWidth = template['$']['width'];
+          const slides = template.slides[0]['RVDisplaySlide'];
+          for (var i = 0; i < slides.length; i++) {
+            let slide = slides[i];
+            
+            let bg = slide['$']['backgroundColor'].split(' ');
+            let bgColor = 'rgba(' + bg.join(',') + ')'
+            let t = new Template({
+              slide: JSON.stringify(result),
+              height: templateHeight,
+              width: templateWidth,
+              backgroundColor: bgColor
             });
             t.save((err, template) => {
               if (err) {
                 console.log(err);
               }
             })
-          });
+          }
         });
-      })
+      });
+
     })
   
     return res.status(200).send();
