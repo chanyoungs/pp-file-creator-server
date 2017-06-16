@@ -6,4 +6,4 @@
 | src/webserver/routes/api/auth/AuthMiddleware.js | 11 | implement auth middleware
 | src/webserver/routes/api/files/files.js | 53 | get this dynamically depending on template
 | src/webserver/routes/api/files/files.js | 64 | remove all other slides properly
-| src/webserver/routes/api/templates/templates.js | 68 | check we have memory - object isnt huge etc
+| src/webserver/routes/api/templates/templates.js | 87 | check we have memory - object isnt huge etc

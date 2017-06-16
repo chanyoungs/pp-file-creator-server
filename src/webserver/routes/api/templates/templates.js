@@ -3,10 +3,10 @@ const router = require('express').Router();
 const fs = require('fs');
 const path = require('path');
 const unzip = require('unzip');
-
+const rtf = require('rtf-parser');
 const multer = require('multer');
 const upload = multer({ dest: '/tmp/' });
-
+const ProPresenter = require('../../../../utils/ProPresenter');
 const XmlParser = require('../../../../utils/XmlParser');
 
 const mongoose = require('mongoose');
@@ -14,12 +14,31 @@ mongoose.Promise = global.Promise;
 mongoose.connect('mongodb://localhost/pp-file-creator');
 
 const TEMPLATE_SCHEMA = mongoose.Schema({
-  slide: Object,
+  slide: String,
   width: Number,
   height: Number,
-  backgroundColor: String
+  backgroundColor: String,
+  preview: Object,
+  htmlContent: String
 });
 const Template = mongoose.model('Card', TEMPLATE_SCHEMA)
+
+function AlignToFlex(d) {
+  switch(d) {
+    case 1:
+    case 'left':
+      return 'flex-start';
+    case 'center':
+    case 0:
+      return 'center';
+    case 2:
+    case 'right':
+      return 'flex-end';
+    default:
+      break;
+  }
+  return 'center';
+}
 
 function streamToString(stream, cb) {
   const chunks = [];
@@ -74,20 +93,46 @@ router.post('/', upload.single('template'), (req, res) => {
           const slides = template.slides[0]['RVDisplaySlide'];
           for (var i = 0; i < slides.length; i++) {
             let slide = slides[i];
-            
+            let text = slide['displayElements'][0]['RVTextElement'][0];
+            let textBox = text['_-RVRect3D-_position'][0]['$'];
             let bg = slide['$']['backgroundColor'].split(' ');
-            let bgColor = 'rgba(' + bg.join(',') + ')'
-            let t = new Template({
-              slide: JSON.stringify(result),
-              height: templateHeight,
-              width: templateWidth,
-              backgroundColor: bgColor
+
+            rtf.string(ProPresenter.decode(text['$'].RTFData), (err, rtfText) => {
+              let c = rtfText.content[0].style.foreground; // color
+              let t = new Template({
+                htmlContent: '<p>Line 1</p><p>Kevin should implement this</p>',
+                slide: JSON.stringify(slide),
+                preview: {
+                  container: {
+                    background: 'rgba(' + bg.join(',') + ')',
+                    width: templateWidth+'px',
+                    height: templateHeight+'px'
+                  },
+                  
+                  box: {
+                    top: textBox.y + 'px',
+                    left: textBox.x + 'px',
+                    width: textBox.width + 'px',
+                    height: textBox.height + 'px'
+                  },
+                  
+                  innerbox: {
+                    'font-family': rtfText.content[0].style.font.name,// rtfText.fonts[0].name,
+                    'font-size': rtfText.content[0].style.fontSize/2+'px',
+                    'text-align': rtfText.content[0].style.align, // left, center, right
+                    'align-items': AlignToFlex(text['$'].verticalAlignment), // flex-start, center, flex-end
+                    'justify-content': AlignToFlex(rtfText.content[0].style.align), // flex-start, center, flex-end
+                    color: 'rgb('+c.red+','+c.green+','+c.blue+')'
+                  }
+                }
+              });
+              t.save((err, template) => {
+                if (err) {
+                  console.log(err);
+                }
+              })
             });
-            t.save((err, template) => {
-              if (err) {
-                console.log(err);
-              }
-            })
+            
           }
         });
       });
@@ -97,6 +142,10 @@ router.post('/', upload.single('template'), (req, res) => {
     return res.status(200).send();
 });
 
+router.delete('/all', (req, res) => {
+  Template.find().remove().exec();
+  return res.status(200).send();
+});
 
 router.delete('/:template_id', (req, res) => {
 	Template.findByIdAndRemove(req.params.template_id, (err, result) => {
