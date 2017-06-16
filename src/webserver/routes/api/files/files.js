@@ -20,37 +20,43 @@ const fs = require('fs');
 const mongoose = require('mongoose');
 
 const Presentation = mongoose.model('Presentation');
+const Template = mongoose.model('Template')
+
+var template = {};
+
+Template.findById('5943d9715edbadeb383083f0', (err, t) => {
+  template = t;
+  // template.slide = JSON.parse(template.slide);
+})
+
 
 router.post('/', (req, res) => {
-  console.log(req.body)
+  // console.log(req.body)
   if (!req.body || typeof(req.body.slides) == 'undefined') {
     return res.status(400).send('request format invalid');
   }
   
-  var template = undefined, doc = undefined;
+  var doc = undefined;
   
-  template = JSON.parse(fs.readFileSync('./src/tempPP/Template.json', "utf-8"));
-  t = template['RVTemplateDocument'];
+  // template = JSON.parse(fs.readFileSync('./src/tempPP/Template.json', "utf-8"));
+  // t = template['RVTemplateDocument'];
   doc = JSON.parse(fs.readFileSync('./src/tempPP/Document.json', "utf-8"));
   d = doc['RVPresentationDocument'];
   
   // format the document from template
-  d['$'].height = t['$'].height;
-  d['$'].width = t['$'].width;
+  d['$'].height = (template.preview.container.height).slice(0,-2);
+  d['$'].width = (template.preview.container.width).slice(0,-2);
   
-  
-  
+  const BASE_SLIDE = JSON.parse(template.slide);
+  console.log(BASE_SLIDE)
   // TODO: get this dynamically depending on template
-  var rtfStart = ProPresenter.decode(t['slides'][0]['RVDisplaySlide'][0]['displayElements'][0]['RVTextElement'][0]['$']['RTFData']);
-  var pos = rtfStart.lastIndexOf('\\cf1');
-  if (pos == -1) {
-    pos = rtfStart.lastIndexOf('\\cf0');
-  }
-  rtfStart = rtfStart.substring(0, pos+5);
+  var rtfStart = ProPresenter.decode(BASE_SLIDE['displayElements'][0]['RVTextElement'][0]['$']['RTFData']);
+  var lastControlStart = rtfStart.lastIndexOf('\\');
+  var pos = rtfStart.indexOf(' ', lastControlStart);
+  console.log(rtfStart);
+  rtfStart = rtfStart.substring(0, pos);
   
-  // get a starting point
-  // const BASE_SLIDE = d['groups'][0]['RVSlideGrouping'][0]['slides'][0]['RVDisplaySlide'][0];
-  const BASE_SLIDE = t['slides'][0]['RVDisplaySlide'][0];
+  
   // TODO: remove all other slides properly
   slidesGroup = [];
   
