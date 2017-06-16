@@ -23,6 +23,9 @@ router.use('/auth', auth);
 const files = require('./files/files');
 router.use('/files', files);
 
+const templates = require('./templates/templates');
+router.use('/templates', templates);
+
 router.get('/', (req, res) => {
   res.send('api v1')
 });

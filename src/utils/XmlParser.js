@@ -15,10 +15,19 @@ class XmlParser {
       })
     })
   }
-  
+
   getJSON(cb) {
     this.getObject((result) => {
       return cb(JSON.stringify(result));
+    })
+  }
+  
+  static parseString(data, cb) {
+    parser.parseString(data, function (err, result) {
+      if (err !== null) {
+        console.log(err);
+      }
+      return cb(result);
     })
   }
   
