@@ -17,19 +17,9 @@ const ProPresenter = require('../../../../utils/ProPresenter');
 const XmlParser = require('../../../../utils/XmlParser');
 const fs = require('fs');
 
-// Connection URL
-const url = 'mongodb://localhost:27017/sermoncreator';
+const mongoose = require('mongoose');
 
-var MongoClient = require('mongodb').MongoClient
-
-// // Use connect method to connect to the server
-// MongoClient.connect(url, function(err, db) {
-//   if (err == null) {
-//     console.log("Connected successfully to server");
-//   }
-// 
-//   db.close();
-// });
+const Presentation = mongoose.model('Presentation');
 
 router.post('/', (req, res) => {
   console.log(req.body)

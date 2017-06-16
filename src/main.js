@@ -3,11 +3,10 @@
 /**
  * Module dependencies.
  */
-
+const db = require('./db/db')();
 const app = require('./webserver/app');
 const debug = require('debug')('debug:server');
 const http = require('http');
-
 
 // Get port from environment and store in Express.
 var port = normalizePort(process.env.PORT || '3000');
