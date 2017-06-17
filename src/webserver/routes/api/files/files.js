@@ -26,9 +26,18 @@ var template = {};
 
 Template.findById('5943d9715edbadeb383083f0', (err, t) => {
   template = t;
-  // template.slide = JSON.parse(template.slide);
 })
 
+router.get('/', (req, res) => {
+  Presentation.find((err, templates) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send();
+    }
+    
+    return res.status(200).json(templates);
+  });
+});
 
 router.post('/', (req, res) => {
   // console.log(req.body)
@@ -48,12 +57,12 @@ router.post('/', (req, res) => {
   d['$'].width = (template.preview.container.width).slice(0,-2);
   
   const BASE_SLIDE = JSON.parse(template.slide);
-  console.log(BASE_SLIDE)
+
   // TODO: get this dynamically depending on template
   var rtfStart = ProPresenter.decode(BASE_SLIDE['displayElements'][0]['RVTextElement'][0]['$']['RTFData']);
   var lastControlStart = rtfStart.lastIndexOf('\\');
   var pos = rtfStart.indexOf(' ', lastControlStart);
-  console.log(rtfStart);
+
   rtfStart = rtfStart.substring(0, pos);
   
   
@@ -61,14 +70,14 @@ router.post('/', (req, res) => {
   slidesGroup = [];
   
   for (var i = 0; i < req.body.slides.length; i++) {
-    console.log(i);
+
     const slide = req.body.slides[i];
     let rtfData = ProPresenter.ConvertHtmlToRtf(slide.htmlContent);
 
     let proSlide = copyObj(BASE_SLIDE);
     rtfData = rtfStart + rtfData + '}';
     rtfEncoded = ProPresenter.encode(rtfData);
-    console.log(rtfData);
+
     proSlide['$']['sort_index'] = i;
     proSlide['$']['serialization-array-index'] = i;
     proSlide['$']['label'] = 'slide ' + i;
@@ -79,14 +88,27 @@ router.post('/', (req, res) => {
   }
   
   d['groups'][0]['RVSlideGrouping'][0]['slides'][0]['RVDisplaySlide'] = slidesGroup;
-  // console.log(d['groups'][0]['RVSlideGrouping'][0]['slides'])
-  
 
   res.set({
     'Content-Disposition': 'attachment; filename="download.pro5"',
     'Content-Type': 'text/xml'
   });
-  return res.send(XmlParser.build(doc));
+  let p = new Presentation({
+    slide: XmlParser.build(doc),
+    title: req.body.title,
+    date: req.body.date
+  });
+  p.save((err) => {
+    if (err) {
+      return res.status(500).send({
+        success: false
+      });
+    }
+    return res.status(201).json({
+      success: true
+    });
+  });
+
 })
 
 module.exports = router;
