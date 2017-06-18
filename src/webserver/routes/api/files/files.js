@@ -24,7 +24,7 @@ const Template = mongoose.model('Template')
 
 var template = {};
 
-Template.findById('5943d9715edbadeb383083f0', (err, t) => {
+Template.findOne({}, (err, t) => {
   template = t;
 })
 
