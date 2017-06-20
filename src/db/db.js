@@ -1,5 +1,5 @@
 module.exports = function() {
-  const DB_URI = 'mongodb://localhost/pp-file-creator';
+  const DB_URI = process.env.NODE_ENV == 'production' ? 'mongodb://mongodb/pp-file-creator' : 'mongodb://localhost/pp-file-creator';
   
   
   const mongoose = require('mongoose');
