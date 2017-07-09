@@ -60,7 +60,8 @@ router.post('/', (req, res) => {
 
   // TODO: get this dynamically depending on template
   var rtfStart = ProPresenter.decode(BASE_SLIDE['displayElements'][0]['RVTextElement'][0]['$']['RTFData']);
-  var lastControlStart = rtfStart.lastIndexOf('\\');
+  var lastControlStart = rtfStart.lastIndexOf('\\cf');
+  console.log('s')
   var pos = rtfStart.indexOf(' ', lastControlStart);
 
   rtfStart = rtfStart.substring(0, pos);
@@ -90,7 +91,7 @@ router.post('/', (req, res) => {
   d['groups'][0]['RVSlideGrouping'][0]['slides'][0]['RVDisplaySlide'] = slidesGroup;
 
   res.set({
-    'Content-Disposition': 'attachment; filename="download.pro5"',
+    'Content-Disposition': 'attachment; filename="'+req.body.title+'"',
     'Content-Type': 'text/xml'
   });
   let p = new Presentation({
@@ -110,5 +111,20 @@ router.post('/', (req, res) => {
   });
 
 })
+
+router.delete('/all', (req, res) => {
+  Presentation.find().remove().exec();
+  return res.status(200).send();
+});
+
+router.delete('/:template_id', (req, res) => {
+	Presentation.findByIdAndRemove(req.params.presentation_id, (err, result) => {
+		if (err) {
+			return res.status(500).send();
+		}
+		return res.status(204).send();
+	});
+  
+});
 
 module.exports = router;
