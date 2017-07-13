@@ -1,0 +1,19 @@
+sudo: required
+services:
+- docker
+language: node_js
+node_js:
+- '6'
+cache: yarn
+env:
+  global:
+  - DOCKER_URL=""
+  - DOCKER_REPO=kevindoveton/pfc-server
+  - DOCKER_TAG=latest
+  - secure: QG25aLYnra9If9eBboMdTQOGmZm61Cd4N7sY4pRgC3PHThy106ofPKM4bUlaoxvzetiscpWy0ZDX8prOjyZd4sVa7DT2PsoxjflzggfjlMxfGZRdDHnP2n+1Rg9loUppyzFr373yNFOkUf45YOjVWSuujRRFato3seU1QKTHK4pOFAiz5dgkJFYUpb0jXQNS5oPDbnKJPpa7JFC7fXa27pOLcoTx5M0HVy6spvBclFWHbj/w5kU/OsIw//sgHBgnAakgTtiwUzVoYLruLCMdRiwEFh7eHdAGfvx61p8mDj5X3IE4e1QiSCI+TjbM8y2hb6+cU2XqEzXXGVzSdo7naCpamy5pwKqscZxGaCylAqu/rsK4JQAzhS8V6PBvWLOrNMUk5VmT88ZjZw1ZT0WLy917767Ha6bqe48SE3ueXoqu0Z+r6WSH5Rld7l6K1QAbm3JiBU8EI7qEUQBzRhU0YnzhjzNtcKXxhgVrtfiL/DoaOPVHsrwyxmw+ygnxBZ2up/KbedYyCm2Ye99UI0tg76UvzKNb8OnLvElado/m776uR5LCeeWrBwHiqRKEQIDzrf7TOgeYpVXFEXY6gHJtet0oBK0O858VL8IU/3JdPkj78wiRQWYRdXzb89Hd0AFG6VnL0p5WczDsUUeZs72peshDbYth/mXZLoFyn9RMOPw=
+  - secure: 0sof52FZltuO9vcGinBVJbKGns1+XiE2tc2yziqrWyof+Xl1xQJlrlCLWuFaPzhb9Vv9Uzhqn//vUn85EXm/eOE8DPr5OUv/MjydoZ3/hKT63Kabj7Ro58FRTKvLPOZuETzB8tda0Z/oHjX3Kon+B0NmVEoykD0xELXaGln70yXj5LEqHcBrJKEpHShA4Vauny8o1QHZ+ZRe1yTJ+fXRV+4bsVyih9vlKwu0wojnyza8l1LemLIqGx83OOmbkqFT9l+zQJ8b+vP+zQ/LNHn6i3gIpn95ffiiHKf3WYAaaAHtO3H9jKTMc9JgdOMhH8IouxJpHmn8WNLIwNkz98mQlow+nkM0ecaUcOFbFOX2GdU8rBenZrZI3Qh4yQobahGjw1FjDF+owk0IUlfkYggRkUi6anhANeR0P/p6a0ek+DTDHLh7aGpOL+eMmLSUkjWcWc4Zjp2twIF1jakacqFAy+SEehLqw06RAY4+GiNTCjbr6tOr26f9m7Y/9oVAUsZ/Q2GlDQfWuYL6oXK+WJXtjVA453dq+pgRh+lngZ6rFlmSwqXKDXQ9LIe9euFAMHZ3mr5aFE9XgYKlKDIeSCyAOfLEkLVm/Ti8mvLSl8KZR1LjSm+C9urlyBAAha7Xo5JvVlN/FH2hM9HabiTteUBj5rxiWm6rk5xp2zgeN74ygJo=
+script:
+- if [ "$TRAVIS_BRANCH" == "master" ]; then docker build -t $DOCKER_URL$DOCKER_REPO\:$DOCKER_TAG
+  .; fi
+- if [ "$TRAVIS_BRANCH" == "master" ]; then docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+  $DOCKER_URL docker push $DOCKER_URL$DOCKER_REPO\:$DOCKER_TAG; fi
