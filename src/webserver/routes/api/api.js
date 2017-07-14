@@ -20,6 +20,9 @@ router.use(bodyParser.json());
 const auth = require('./auth/auth');
 router.use('/auth', auth);
 
+const users = require('./users/users');
+router.use('/users', users);
+
 const files = require('./files/files');
 router.use('/files', files);
 

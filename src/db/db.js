@@ -19,7 +19,7 @@ module.exports = function() {
   }); 
 
   // When the connection is disconnected
-  mongoose.connection.on('disconnected', function () {  
+  mongoose.connection.on('disconnected', function () {
     console.log('Mongoose default connection disconnected'); 
   });
 
@@ -49,4 +49,12 @@ module.exports = function() {
   });
 
   const Presentation = mongoose.model('Presentation', PRESENTATION_SCHEMA)
+  
+  const USER_SCHEMA = mongoose.Schema({
+    username: String,
+    password: String,
+    salt: String
+  });
+  
+  const User = mongoose.model('User', USER_SCHEMA)
 }

@@ -3,6 +3,11 @@ class ProPresenter {
 
   }
 
+  /**
+   * convert simple html to rtf
+   * @param html {string} - the html to be converted
+   * @returns {string} - the converted rtf data
+  */
   static ConvertHtmlToRtf(html) {
     if (!(typeof html === "string" && html)) {
       return null;
@@ -78,10 +83,20 @@ class ProPresenter {
     return richText;
   }
 
+  /**
+   * encode a string to base64
+   * @param d {string} - the string to be converted
+   * @returns {string} - the string as base64
+  */
   static encode(d) {
     return new Buffer(d).toString('base64');
   }
 
+  /**
+   * decode a base64string to plaintext
+   * @param d {string} - the base64 string
+   * @returns {string} - the plaintext version of the string
+  */
   static decode(d) {
     return new Buffer(d, 'base64').toString('ascii')
   }

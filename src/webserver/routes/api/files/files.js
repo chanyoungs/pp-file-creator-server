@@ -56,7 +56,6 @@ router.get('/:presentation_id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  // console.log(req.body)
   if (!req.body || typeof(req.body.slides) == 'undefined') {
     return res.status(400).send('request format invalid');
   }

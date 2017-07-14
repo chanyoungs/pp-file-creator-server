@@ -13,7 +13,11 @@ const XmlParser = require('../../../../utils/XmlParser');
 const mongoose = require('mongoose');
 const Template = mongoose.model('Template');
 
-
+/**
+ * convert propresenter align to a flex type
+ * @param d {int} - the propresenter align int
+ * @returns {string} - the flex postition
+*/
 function AlignToFlex(d) {
   switch(d) {
     case '1':
