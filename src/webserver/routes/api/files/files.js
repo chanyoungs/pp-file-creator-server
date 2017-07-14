@@ -39,6 +39,22 @@ router.get('/', (req, res) => {
   });
 });
 
+router.get('/:presentation_id', (req, res) => {
+  Presentation.findById(req.params.presentation_id, (err, presentation) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send();
+    }
+    
+    res.set({
+      'Content-Disposition': 'attachment; filename="'+presentation.title+'"',
+      'Content-Type': 'text/octet-stream' // TODO: maybe pro5 has its own type
+    });
+    
+    return res.status(200).send(presentation);
+  });
+});
+
 router.post('/', (req, res) => {
   // console.log(req.body)
   if (!req.body || typeof(req.body.slides) == 'undefined') {
@@ -47,8 +63,6 @@ router.post('/', (req, res) => {
   
   var doc = undefined;
   
-  // template = JSON.parse(fs.readFileSync('./src/tempPP/Template.json', "utf-8"));
-  // t = template['RVTemplateDocument'];
   doc = JSON.parse(fs.readFileSync('./src/tempPP/Document.json', "utf-8"));
   d = doc['RVPresentationDocument'];
   
@@ -58,16 +72,12 @@ router.post('/', (req, res) => {
   
   const BASE_SLIDE = JSON.parse(template.slide);
 
-  // TODO: get this dynamically depending on template
   var rtfStart = ProPresenter.decode(BASE_SLIDE['displayElements'][0]['RVTextElement'][0]['$']['RTFData']);
   var lastControlStart = rtfStart.lastIndexOf('\\cf');
-  console.log('s')
   var pos = rtfStart.indexOf(' ', lastControlStart);
 
   rtfStart = rtfStart.substring(0, pos);
   
-  
-  // TODO: remove all other slides properly
   slidesGroup = [];
   
   for (var i = 0; i < req.body.slides.length; i++) {
@@ -90,10 +100,6 @@ router.post('/', (req, res) => {
   
   d['groups'][0]['RVSlideGrouping'][0]['slides'][0]['RVDisplaySlide'] = slidesGroup;
 
-  res.set({
-    'Content-Disposition': 'attachment; filename="'+req.body.title+'"',
-    'Content-Type': 'text/xml'
-  });
   let p = new Presentation({
     slide: XmlParser.build(doc),
     title: req.body.title,
