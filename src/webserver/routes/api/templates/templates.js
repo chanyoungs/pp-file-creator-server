@@ -60,13 +60,13 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:template_id', (req, res) => {
-	Template.findById(req.params.template_id, (err, template) => {
-		if (err) {
-			console.log(err);
-			return res.status(500).send();
-		}
-		return res.status(200).json(template);
-	})
+  Template.findById(req.params.template_id, (err, template) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).send();
+    }
+    return res.status(200).json(template);
+  })
 });
 
 router.post('/', upload.single('template'), (req, res) => {
@@ -155,12 +155,12 @@ router.delete('/all', (req, res) => {
 });
 
 router.delete('/:template_id', (req, res) => {
-	Template.findByIdAndRemove(req.params.template_id, (err, result) => {
-		if (err) {
-			return res.status(500).send();
-		}
-		return res.status(204).send();
-	});
+  Template.findByIdAndRemove(req.params.template_id, (err, result) => {
+    if (err) {
+      return res.status(500).send();
+    }
+    return res.status(204).send();
+  });
   
 });
 
