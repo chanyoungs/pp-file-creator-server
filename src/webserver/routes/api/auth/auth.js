@@ -1,26 +1,21 @@
 const router = require('express').Router();
 const mongoose = require('mongoose');
 const passport = require('passport');
+
 const User = mongoose.model('User');
+const Session = mongoose.model('Session');
+
 router.post('/', passport.authenticate('local'),(req, res) => {
 
-  // let username = req.body.username;
-  // let password = req.body.password;
-  // 
-  // // TODO: check password and username
-  // User.find({username: username}, (err, user) => {
-  //   if (err) {
-  //     console.log(err);
-  //     return res.status(500).send();
-  //   }
-  //   return res.status(200).json(user);
-  // })
-  
   return res.status(200).json({
     success: true,
     token: req.user.token
   });
 
 })
+
+router.delete('/', (req, res) => {
+  
+});
 
 module.exports = router;

@@ -4,6 +4,8 @@ const CORS_WHITELIST = [
   /^(http(s)?:\/\/)(.*\.)?kdoveton\.com(:\d+)?$/
 ]
 
+const passport = require('passport');
+
 const router = require('express').Router();
 
 const AuthMiddleware = require('./auth/AuthMiddleware');
@@ -32,6 +34,14 @@ router.use('/templates', templates);
 router.get('/', (req, res) => {
   res.send('api v1')
 });
+
+// TODO: DELETE
+router.get('/sessions', (req, res) => {
+  const Session = require('mongoose').model('Session');
+  Session.find((err, session) => {
+    res.json(session);
+  })
+})
 
 router.post('/parse', (req, res) => {
   const { toRtfData } = require('../../../utils/draftjs')

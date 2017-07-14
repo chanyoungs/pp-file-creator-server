@@ -57,4 +57,12 @@ module.exports = function() {
   });
   
   const User = mongoose.model('User', USER_SCHEMA)
+  
+  const SESSION_SCHEMA = mongoose.Schema({
+    username: String,
+    token: String,
+    created: Date
+  });
+  
+  const Session = mongoose.model('Session', SESSION_SCHEMA)
 }
