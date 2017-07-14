@@ -5,34 +5,36 @@ var accessTokens = process.env.NODE_ENV == "development" ? [{token: '9e5207a53db
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 
 const User = mongoose.model('User');
 
 passport.use(new LocalStrategy(
-	function(username, password, cb) {
-		User.findOne({ username: username }, function(err, user) {	
-  			
-  			var token = '';
-  			crypto.randomBytes(48, function(err, buffer) {
-  				token = buffer.toString('hex');
-  				return cb(null, {token: token});
-  			});
-  		});
-	}
+  function(username, password, cb) {
+    User.findOne({ username: username }, function(err, user) {	
+      
+      // TODO: check user is valid
+      var token = '';
+      crypto.randomBytes(48, function(err, buffer) {
+        token = buffer.toString('hex');
+        return cb(null, {token: token});
+      });
+    });
+  }
 ));
 
 passport.serializeUser(function(token, cb) {
-	accessTokens.push(token);
-	cb(null, token);
+  accessTokens.push(token);
+  cb(null, token);
 });
 
 passport.deserializeUser(function(token, cb) {
-	for (var i = 0; i < accessTokens.length; i++) {
-		if (accessTokens[i] == token) {
-			cb(null, token);
-		}
-	}
-	cb(new Error('no token'));
+  for (var i = 0; i < accessTokens.length; i++) {
+    if (accessTokens[i] == token) {
+      cb(null, token);
+    }
+  }
+  cb(new Error('no token'));
 });
 
 router.use(passport.initialize());
@@ -64,9 +66,9 @@ router.use(function (req, res, next) {
   // }
  
   function fail() {
-  	res.status(401).send('Unauthorised');
+    res.status(401).send('Unauthorised');
   }
-	
+  
 });
 
 module.exports = router;

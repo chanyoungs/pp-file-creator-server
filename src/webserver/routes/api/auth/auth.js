@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const mongoose = require('mongoose');
-
+const passport = require('passport');
 const User = mongoose.model('User');
-router.post('/', (req, res) => {
+router.post('/', passport.authenticate('local'),(req, res) => {
 
   // let username = req.body.username;
   // let password = req.body.password;
@@ -16,7 +16,10 @@ router.post('/', (req, res) => {
   //   return res.status(200).json(user);
   // })
   
-  return res.status(200).send();
+  return res.status(200).json({
+    success: true,
+    token: req.user.token
+  });
 
 })
 
