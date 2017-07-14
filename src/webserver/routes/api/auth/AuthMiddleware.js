@@ -6,12 +6,27 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const mongoose = require('mongoose');
 const crypto = require('crypto');
+const hash = require('../../../../utils/hash');
 
 const User = mongoose.model('User');
 
 passport.use(new LocalStrategy(
   function(username, password, cb) {
     User.findOne({ username: username }, function(err, user) {	
+      
+      if (err) {
+        return cb(err);
+      }
+      
+      if (!user) {
+        console.log('b')
+        return cb(null, false, {message: 'Incorrect username.'});
+      }
+      
+      if (user.password != hash(password, user.salt)) {
+        console.log('a')
+        return cb(null, false, {message: 'Incorrect password.'});
+      }
       
       // TODO: check user is valid
       var token = '';
