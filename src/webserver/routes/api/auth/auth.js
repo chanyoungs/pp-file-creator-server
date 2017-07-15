@@ -5,6 +5,9 @@ const passport = require('passport');
 const User = mongoose.model('User');
 const Session = mongoose.model('Session');
 
+const facebook = require('./facebook');
+router.use('/facebook', facebook);
+
 
 // https://github.com/jaredhanson/passport/blob/935fbdbc2f63eb0a746a3e1373fb112c5efee6b6/lib/middleware/authenticate.js#L23-L40
 router.post('/', (req, res, next) => {
@@ -32,5 +35,13 @@ router.post('/', (req, res, next) => {
 router.delete('/', (req, res) => {
   
 });
+
+// router.get('/', (req, res) => {
+//   res.json({
+//     clientID: process.env.FBAppId,
+//     clientSecret: process.env.FBAppSecret,
+//     callbackURL: process.env.FBCallbackUrl
+//   })
+// })
 
 module.exports = router;

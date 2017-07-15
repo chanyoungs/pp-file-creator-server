@@ -53,6 +53,8 @@ module.exports = function() {
   const USER_SCHEMA = mongoose.Schema({
     username: String,
     password: String,
+    facebookId: String,
+    email: String,
     salt: String
   });
   

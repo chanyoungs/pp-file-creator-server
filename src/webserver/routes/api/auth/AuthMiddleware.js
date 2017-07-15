@@ -2,6 +2,7 @@ const router = require('express').Router();
 
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const hash = require('../../../../utils/hash');
@@ -54,6 +55,35 @@ passport.deserializeUser(function(token, cb) {
   console.log(token);
   cb(new Error('no token'));
 });
+
+passport.use(new FacebookStrategy({
+    clientID: process.env.FBAppId,
+    clientSecret: process.env.FBAppSecret,
+    // callbackURL: process.env.FBCallbackUrl
+    callbackURL: 'http://localhost:3000/api/v1/auth/facebook/callback/'
+  },
+  (accessToken, refreshToken, profile, cb) => {
+    // console.log('a ', accessToken);
+    // console.log('r ', refreshToken);
+    // console.log('p ', profile);
+    User.find({facebookId: profile.id}, (err, user) => {
+      if (user.length == 0) {
+        var user = new User({
+          facebookId: profile.id,
+          email: profile.email
+        });
+        user.save((err, user, success) => {
+          return cb(err, user);
+        });
+      } else {
+        return cb(err, user);
+      }
+    })
+    // User.findOrCreate({ facebookId: profile.id }, function (err, user) {
+      // return cb(err, user);
+    // });
+  }
+));
 
 router.use(passport.initialize());
 
