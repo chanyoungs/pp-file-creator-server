@@ -5,7 +5,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const mongoose = require('mongoose');
 const crypto = require('crypto');
 const hash = require('../../../../utils/hash');
-
+const flash = require('connect-flash');
 const User = mongoose.model('User');
 const Session = mongoose.model('Session');
 
@@ -14,17 +14,16 @@ passport.use(new LocalStrategy(
     User.findOne({ username: username }, function(err, user) {	
       
       if (err) {
+        console.log(err);
         return cb(err);
       }
       
       if (!user) {
-        console.log('b')
-        return cb(null, false, {message: 'Incorrect username.'});
+        return cb(null, false, {message: 'Incorrect username.', success: false});
       }
       
       if (user.password != hash(password, user.salt)) {
-        console.log('a')
-        return cb(null, false, {message: 'Incorrect password.'});
+        return cb(null, false, {message: 'Incorrect password.', success: false});
       }
       
       var token = '';
@@ -32,7 +31,8 @@ passport.use(new LocalStrategy(
         token = buffer.toString('hex');
         return cb(null, {
           token: token,
-          username: username
+          username: username,
+          success: true
         });
       });
     });
@@ -47,7 +47,6 @@ passport.serializeUser(function(currentSession, cb) {
   });
   
   session.save();
-  console.log('test')
   cb(null, currentSession);
 });
 
@@ -57,7 +56,6 @@ passport.deserializeUser(function(token, cb) {
 });
 
 router.use(passport.initialize());
-router.use(passport.session());
 
 // router.use(function (req, res, next) {
 //   if (req.url === '/auth/login/') {

@@ -43,6 +43,12 @@ router.get('/sessions', (req, res) => {
   })
 })
 
+router.delete('/sessions/all', (req, res) => {
+  const Session = require('mongoose').model('Session');
+  Session.find().remove().exec();
+  return res.status(200).send();
+})
+
 router.post('/parse', (req, res) => {
   const { toRtfData } = require('../../../utils/draftjs')
   var data = toRtfData(req.body.state)
