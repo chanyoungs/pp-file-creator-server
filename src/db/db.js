@@ -67,4 +67,12 @@ module.exports = function() {
   });
   
   const Session = mongoose.model('Session', SESSION_SCHEMA)
+  
+  const S3_SCHEMA = mongoose.Schema({
+    user: String,
+    path: String,
+    mimetype: String
+  });
+  
+  const S3 = mongoose.model('S3', S3_SCHEMA)
 }

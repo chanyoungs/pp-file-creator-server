@@ -31,6 +31,9 @@ router.use('/files', files);
 const templates = require('./templates/templates');
 router.use('/templates', templates);
 
+const s3 = require('./s3/s3');
+router.use('/s3', s3);
+
 router.get('/', (req, res) => {
   res.send('api v1')
 });
