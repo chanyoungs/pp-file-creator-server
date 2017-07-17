@@ -47,11 +47,12 @@ router.post('/', upload.single('file'), (req, res) => {
       success: false
     });
   }
-
+  console.log(req.file)
   // TODO: get user from access token or req.user
   var s3 = new S3({
     user: 'testy',
     path: req.file.path,
+    filename: req.file.filename,
     mimetype: req.file.mimetype
   });
   s3.save((err, doc) => {

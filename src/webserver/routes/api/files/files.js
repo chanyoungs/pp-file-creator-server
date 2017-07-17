@@ -16,11 +16,14 @@ const router = require('express').Router();
 const ProPresenter = require('../../../../utils/ProPresenter');
 const XmlParser = require('../../../../utils/XmlParser');
 const Guid = require('../../../../utils/Guid');
+const mkdirp = require('../../../../utils/MkdirP');
+const Mimetypes = require('../../../../utils/Mimetypes');
 const fs = require('fs');
 const request = require('request');
+const Zip = require('zip-dir');
+
 const STATUS = require('../../../status');
 const mongoose = require('mongoose');
-
 const Presentation = mongoose.model('Presentation');
 const Template = mongoose.model('Template')
 
@@ -55,13 +58,16 @@ router.get('/:presentation_id', (req, res) => {
         return res.status(STATUS.SERVER_ERROR).send();
       }
       
-      res.set({
-        'Content-Disposition': 'attachment; filename="'+presentation.title+'.pro5"',
-        'Content-Type': 'text/octet-stream' // TODO: maybe pro5 has its own type
-      });
-      
-      BuildPro5Document(presentation, template).then((doc) => {
-        return res.status(STATUS.OK).send(XmlParser.build(doc));
+      BuildPro5Document(presentation, template).then((data) => {
+        let file = XmlParser.build(data['doc']);
+        console.log(data['images']);
+        BuildPro5Package({data: file, title: presentation.title}, data['images']).then((path) => {
+          res.set({
+            'Content-Disposition': 'attachment; filename="'+presentation.title+'.pro5x"',
+            'Content-Type': 'text/octet-stream' // TODO: maybe pro5 has its own type
+          });
+          return res.status(STATUS.OK).sendFile(path);
+        });
       });
     })
   });
@@ -71,7 +77,7 @@ router.get('/:presentation_id', (req, res) => {
  * save a single presentation to db
 */
 router.post('/', (req, res) => {
-  console.log(req.body)
+
   // TODO: *better* error checking
   let sermon = {
     slides: req.body.slides || [],
@@ -110,7 +116,7 @@ router.post('/', (req, res) => {
 */
 router.delete('/all', (req, res) => {
   Presentation.find().remove().exec();
-  return res.status(STATUS.OK).send();
+  return res.status(STATUS.NO_CONTENT).send();
 });
 
 /**
@@ -125,6 +131,80 @@ router.delete('/:template_id', (req, res) => {
 	});
 });
 
+/**
+ * ensure a folder exists - https://github.com/substack/node-mkdirp
+ * @param path {String} - path to folder
+ * @returns {Promise} - null if no error, otherwise error
+*/
+function ensureExists(path) {
+  return new Promise((resolve, reject) => {
+    mkdirp(path, (err) => {
+      if (err) {
+        reject(err);
+      }
+      resolve();
+    });
+  }) // end promise
+}
+
+/**
+ * get all the images
+*/
+function downloadImage(path, url) {
+  return new Promise((resolve, reject) => {
+    request(url, (err, res, body) => {
+    })
+    .pipe(fs.createWriteStream(path).on('close', () => {
+      resolve();
+    }))
+  });
+}
+
+function writeFile(path, data) {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(path, data, (err) => {
+      if (err) {
+        reject(err);
+      }
+      resolve();
+    })
+  });
+}
+
+/**
+ * build a pro5X zip
+*/
+function BuildPro5Package(doc, files) {
+  const DOWNLOAD_URL = 'http://localhost:3000/api/v1/s3/';
+  const BASE_PATH = '/tmp/' + Guid();
+  const BUILD_PATH = (BASE_PATH + '/' + doc.title);
+  const IMAGE_PATH = BUILD_PATH + '/media/files/'
+  const FILE_PATH = BUILD_PATH+'.pro5x';
+  const DOC_PATH = BUILD_PATH + '/' + doc.title + '.pro5';
+  
+  return new Promise((resolve, reject) => {
+    ensureExists(IMAGE_PATH).then(() => {
+      var allFiles = [];
+      for (var i = 0; i < files.length; i++) {
+        let file = files[i];
+        let filePath = IMAGE_PATH + '/' + file.filename + (Mimetypes[file.mimetype] || '.jpg');
+        let url = DOWNLOAD_URL + file._id;
+        allFiles.push(downloadImage(filePath, url));
+      }
+      allFiles.push(writeFile(DOC_PATH, doc.data));
+      
+      Promise.all(allFiles).then(() => {
+        Zip(BASE_PATH, { saveTo: FILE_PATH }, (err, buffer) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(FILE_PATH)
+        });
+      })
+    })
+  });
+}
+
 
 /**
  * build a propresenter document and save in mongo
@@ -134,10 +214,11 @@ router.delete('/:template_id', (req, res) => {
 */
 function BuildPro5Document(file, template) {
   return new Promise((resolve, reject) => {
-    // TODO: this should probably happen async
+    var images = [];
+    var doc = undefined;
+
     fs.readFile('./src/tempPP/Document.json', "utf-8", (err, data) => {
       var doc = JSON.parse(data);
-      
       var d = doc['RVPresentationDocument'];
       
       // format the document from template
@@ -145,30 +226,34 @@ function BuildPro5Document(file, template) {
       d['$'].width = (template.preview.container.width).slice(0,-2);
       
       const BASE_SLIDE = JSON.parse(template.slide);
-
-      slidesGroup = [];
       
-      for (var i = 0; i < file.slides.length; i++) {
-        const slide = file.slides[i];
-        let proSlide = undefined;
+      fs.readFile('./src/tempPP/ImageSlide.json', 'utf-8', (err, data) => {
+        const BASE_IMAGE_SLIDE = JSON.parse(data);
+        slidesGroup = [];
         
-        if (slide.type == 'TEXT_SLIDE') {
-          proSlide = createTextSlide(slide, i, BASE_SLIDE);
-        } else if (slide.type == 'IMAGE_SLIDE') {
-          proSlide = createImageSlide(slide, i, BASE_SLIDE);
-        } else {
-          continue;
+        for (var i = 0; i < file.slides.length; i++) {
+          const slide = file.slides[i];
+          let proSlide = undefined;
+          
+          if (slide.type == 'TEXT_SLIDE') {
+            proSlide = createTextSlide(slide, i, BASE_SLIDE);
+          } else if (slide.type == 'IMAGE_SLIDE') {
+            images.push(slide.image)
+            proSlide = createImageSlide(slide, i, BASE_IMAGE_SLIDE);
+          } else {
+            continue;
+          }
+          
+          slidesGroup.push(proSlide);
+          
         }
-        
-        slidesGroup.push(proSlide);
-        
-      }
-      
-      d['groups'][0]['RVSlideGrouping'][0]['slides'][0]['RVDisplaySlide'] = slidesGroup;
 
-      resolve(doc);
-    });
-  })
+        d['groups'][0]['RVSlideGrouping'][0]['slides'][0]['RVDisplaySlide'] = slidesGroup;
+        resolve({doc: doc, images: images});
+        
+      }) // end imageslide.json
+    }); // end doc.json
+  }) // end promise
 }
 
 /**
@@ -206,18 +291,16 @@ function createTextSlide(slide, position, baseSlide) {
  * @returns {Object} propresenter slide
 */
 function createImageSlide(slide, position, baseSlide) {
-  const S3 = mongoose.model('S3');
-  
-  // TODO: error check
-  // S3.findOne({_id: slide.image._id}, (err, doc) => {
-  //   // request(slide.image.path)
-  //   //   .pipe(
-  //   //     fs.createWriteStream()
-  //   //   )
-  // })
-  
-  
+  // console.log(slide);
   let proSlide = copyObj(baseSlide);
+  
+  proSlide['$']['sort_index'] = position;
+  proSlide['$']['serialization-array-index'] = position;
+  proSlide['$']['label'] = 'slide ' + position;
+  proSlide['$']['UUID'] = Guid();
+  
+  let element = proSlide['cues'][0]['RVMediaCue'][0]['element'][0];
+  element['$']['source'] = 'file://localhost/files/' + slide.image.filename + (Mimetypes[slide.image.mimetype] || '.jpg');
   
   return proSlide;
 }

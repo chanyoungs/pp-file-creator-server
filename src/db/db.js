@@ -72,6 +72,7 @@ module.exports = function() {
   const S3_SCHEMA = mongoose.Schema({
     user: String,
     path: String,
+    filename: String,
     mimetype: String
   });
   
