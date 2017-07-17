@@ -4,8 +4,9 @@
 | src/utils/draftjs.js | 42 | make this one switch
 | src/webserver/routes/api/api.js | 1 | figure out cors
 | src/webserver/routes/api/api.js | 41 | DELETE
-| src/webserver/routes/api/files/files.js | 134 | this should probably happen async
-| src/webserver/routes/api/files/files.js | 210 | error check
+| src/webserver/routes/api/files/files.js | 75 | *better* error checking
+| src/webserver/routes/api/files/files.js | 137 | this should probably happen async
+| src/webserver/routes/api/files/files.js | 211 | error check
 | src/webserver/routes/api/s3/s3.js | 51 | get user from access token or req.user
 | src/webserver/routes/api/templates/templates.js | 85 | check we have memory - object isnt huge etc
 | src/webserver/routes/api/users/users.js | 23 | DELETE THIS!

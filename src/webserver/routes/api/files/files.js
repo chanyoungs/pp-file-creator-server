@@ -42,18 +42,28 @@ router.get('/', (req, res) => {
  * download a single presentation
 */
 router.get('/:presentation_id', (req, res) => {
+
   Presentation.findById(req.params.presentation_id, (err, presentation) => {
     if (err) {
       console.log(err);
       return res.status(STATUS.SERVER_ERROR).send();
     }
-    
-    res.set({
-      'Content-Disposition': 'attachment; filename="'+presentation.title+'"',
-      'Content-Type': 'text/octet-stream' // TODO: maybe pro5 has its own type
-    });
-    
-    return res.status(STATUS.OK).send(presentation);
+
+    Template.findById(presentation.template, (err, template) => {
+      if (err) {
+        console.log(err);
+        return res.status(STATUS.SERVER_ERROR).send();
+      }
+      
+      res.set({
+        'Content-Disposition': 'attachment; filename="'+presentation.title+'.pro5"',
+        'Content-Type': 'text/octet-stream' // TODO: maybe pro5 has its own type
+      });
+      
+      BuildPro5Document(presentation, template).then((doc) => {
+        return res.status(STATUS.OK).send(XmlParser.build(doc));
+      });
+    })
   });
 });
 
@@ -61,10 +71,13 @@ router.get('/:presentation_id', (req, res) => {
  * save a single presentation to db
 */
 router.post('/', (req, res) => {
+  console.log(req.body)
+  // TODO: *better* error checking
   let sermon = {
-    slide: req.body.slides,
-    title: req.body.title,
-    date: req.body.date
+    slides: req.body.slides || [],
+    title: req.body.title || 'No Title',
+    date: req.body.date || new Date(),
+    template: req.body.template || undefined
   };
   
   if (!req.body || typeof(req.body.slides) == 'undefined') {
@@ -72,9 +85,10 @@ router.post('/', (req, res) => {
   }
   
   let p = new Presentation({
-    slide: sermon.slides,
+    slides: sermon.slides,
     title: sermon.title,
-    date: sermon.date
+    date: sermon.date,
+    template: sermon.template
   });
   
   p.save((err) => {
@@ -88,17 +102,6 @@ router.post('/', (req, res) => {
     })
   });
 })
-  
-  // return res.json(req.body);
-  
-  // Template.find({_id: req.body.template._id}, (err, _template) => {
-  //   BuildPro5Document(req.body, _template[0]).then(() => {
-  //     return res.status(201).send();
-  //   }).catch((err) => {
-  //     console.log(err);
-  //     return res.status(500).send(err);
-  //   })
-  // })
 
 
 
@@ -164,8 +167,6 @@ function BuildPro5Document(file, template) {
       d['groups'][0]['RVSlideGrouping'][0]['slides'][0]['RVDisplaySlide'] = slidesGroup;
 
       resolve(doc);
-      
-      
     });
   })
 }

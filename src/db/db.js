@@ -43,9 +43,10 @@ module.exports = function() {
   const Template = mongoose.model('Template', TEMPLATE_SCHEMA)
 
   const PRESENTATION_SCHEMA = mongoose.Schema({
-    slides: String,
+    slides: Array,
     title: String,
-    date: Date
+    date: Date,
+    template: String
   });
 
   const Presentation = mongoose.model('Presentation', PRESENTATION_SCHEMA)
