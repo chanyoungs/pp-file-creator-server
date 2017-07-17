@@ -42,6 +42,8 @@ router.post('/', upload.single('file'), (req, res) => {
     return res.status(400).send('send file, also check content-type');
   }
 
+  // TODO: get user from access token or req.user
+
   var s3 = new S3({
     user: 'testy',
     path: req.file.path,

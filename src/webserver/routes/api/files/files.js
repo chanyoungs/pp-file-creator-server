@@ -15,7 +15,9 @@ function copyObj(obj) {
 const router = require('express').Router();
 const ProPresenter = require('../../../../utils/ProPresenter');
 const XmlParser = require('../../../../utils/XmlParser');
+const Guid = require('../../../../utils/Guid');
 const fs = require('fs');
+const request = require('request');
 
 const mongoose = require('mongoose');
 
@@ -53,6 +55,8 @@ router.post('/', (req, res) => {
   if (!req.body || typeof(req.body.slides) == 'undefined') {
     return res.status(400).send('request format invalid');
   }
+  
+  // return res.json(req.body);
   
   Template.find({_id: req.body.template._id}, (err, _template) => {
     BuildPro5Document(req.body, _template[0]).then(() => {
@@ -108,21 +112,17 @@ function BuildPro5Document(file, template) {
     slidesGroup = [];
     
     for (var i = 0; i < file.slides.length; i++) {
-
       const slide = file.slides[i];
-      let rtfData = ProPresenter.ConvertHtmlToRtf(slide.htmlContent);
-
-      let proSlide = copyObj(BASE_SLIDE);
-      rtfData = rtfStart + rtfData + '}';
-      rtfEncoded = ProPresenter.encode(rtfData);
-
-      proSlide['$']['sort_index'] = i;
-      proSlide['$']['serialization-array-index'] = i;
-      proSlide['$']['label'] = 'slide ' + i;
-      proSlide['$']['UUID'] = '5657B2D7-7DA3-0640-2069-6644056432C' + i;
-      proSlide['displayElements'][0]['RVTextElement'][0]['$']['RTFData'] = rtfEncoded;
+      let proSlide = undefined;
+      
+      if (slide.type == 'TEXT_SLIDE') {
+        proSlide = createTextSlide(slide, i, BASE_SLIDE);
+      } else if (slide.type == 'IMAGE_SLIDE') {
+        proSlide = createImageSlide(slide, i, BASE_SLIDE);
+      }
       
       slidesGroup.push(proSlide);
+      
     }
     
     d['groups'][0]['RVSlideGrouping'][0]['slides'][0]['RVDisplaySlide'] = slidesGroup;
@@ -142,5 +142,52 @@ function BuildPro5Document(file, template) {
   })
   
 }
+
+/**
+ * create a propresenter slide object from a request
+ * @param slide {Object} - slide object
+ * @param position {Number} - the slides position in the document
+ * @returns {Object} propresenter slide
+*/
+function createTextSlide(slide, position, baseSlide) {
+  let rtfData = ProPresenter.ConvertHtmlToRtf(slide.htmlContent);
+
+  let proSlide = copyObj(baseSlide);
+  rtfData = rtfStart + rtfData + '}';
+  rtfEncoded = ProPresenter.encode(rtfData);
+
+  proSlide['$']['sort_index'] = i;
+  proSlide['$']['serialization-array-index'] = i;
+  proSlide['$']['label'] = 'slide ' + i;
+  proSlide['$']['UUID'] = Guid();
+  proSlide['displayElements'][0]['RVTextElement'][0]['$']['RTFData'] = rtfEncoded;
+  
+  return proSlide;
+}
+
+/**
+ * @requires request - https://github.com/request/request
+ * @param slide {Object} - slide object
+ * @param position {Number} - the slides position in the document
+ * @returns {Object} propresenter slide
+*/
+function createImageSlide(slide, position, baseSlide) {
+  const S3 = mongoose.model('S3');
+  
+  // TODO: error check
+  S3.findOne({_id: slide.image._id}, (err, doc) => {
+    request(slide.image.path)
+      .pipe(
+        fs.createWriteStream()
+      )
+  })
+  
+  
+  let proSlide = copyObj(baseSlide);
+  
+  return proSlide;
+}
+
+
 
 module.exports = router;
