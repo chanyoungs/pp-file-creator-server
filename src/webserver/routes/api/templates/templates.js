@@ -9,7 +9,7 @@ const upload = multer({ dest: '/tmp/' });
 const ProPresenter = require('../../../../utils/ProPresenter');
 const XmlParser = require('../../../../utils/XmlParser');
 
-
+const STATUS = require('../../../status');
 const mongoose = require('mongoose');
 const Template = mongoose.model('Template');
 
@@ -52,10 +52,10 @@ router.get('/', (req, res) => {
   Template.find((err, templates) => {
     if (err) {
       console.log(err);
-      return res.status(500).send();
+      return res.status(STATUS.BAD_REQUEST).send();
     }
     
-    return res.status(200).json(templates);
+    return res.status(STATUS.OK).json(templates);
   });
 });
 
@@ -63,16 +63,16 @@ router.get('/:template_id', (req, res) => {
   Template.findById(req.params.template_id, (err, template) => {
     if (err) {
       console.log(err);
-      return res.status(500).send();
+      return res.status(STATUS.BAD_REQUEST).send();
     }
-    return res.status(200).json(template);
+    return res.status(STATUS.OK).json(template);
   })
 });
 
 router.post('/', upload.single('template'), (req, res) => {
 // console.log(req.file, req.body)
   if (typeof(req.file) == 'undefined') {
-    return res.status(400).send('send zip, also check content-type');
+    return res.status(STATUS.BAD_REQUEST).send('send zip, also check content-type');
   }
 
   fs.createReadStream(req.file.path)
@@ -146,20 +146,20 @@ router.post('/', upload.single('template'), (req, res) => {
 ///
     })
   
-    return res.status(200).send();
+    return res.status(STATUS.OK).send();
 });
 
 router.delete('/all', (req, res) => {
   Template.find().remove().exec();
-  return res.status(200).send();
+  return res.status(STATUS.OK).send();
 });
 
 router.delete('/:template_id', (req, res) => {
   Template.findByIdAndRemove(req.params.template_id, (err, result) => {
     if (err) {
-      return res.status(500).send();
+      return res.status(STATUS.OK).send();
     }
-    return res.status(204).send();
+    return res.status(STATUS.NO_CONTENT).send();
   });
   
 });

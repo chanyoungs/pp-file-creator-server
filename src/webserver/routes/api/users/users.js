@@ -24,11 +24,11 @@ const User = mongoose.model('User');
 router.get('/', (req, res) => {
   if (req.query.allow == 1) {
     User.find((err, users) => {
-      return res.status(200).json(users);
+      return res.status(STATUS.OK).json(users);
     })
   }
   else {
-    return res.status(404).send();
+    return res.status(STATUS.NOT_FOUND).send();
   }
 })
 
@@ -45,12 +45,12 @@ router.post('/', (req, res) => {
   // TODO: check the user doesn't already exist
   user.save((err, user) => {
     if (err) {
-      return res.status(500).send({
+      return res.status(STATUS.SERVER_ERROR).send({
         success: false
       });
     }
     
-    return res.status(201).json({
+    return res.status(STATUS.CREATED).json({
       success: true,
       user: user._id
     });
@@ -60,15 +60,15 @@ router.post('/', (req, res) => {
 // TODO: should probably delete this
 router.delete('/all', (req, res) => {
   User.find().remove().exec();
-  return res.status(200).send();
+  return res.status(STATUS.OK).send();
 });
 
 router.delete('/:user_id', (req, res) => {
 	User.findByIdAndRemove(req.params.user_id, (err, result) => {
 		if (err) {
-			return res.status(500).send();
+			return res.status(STATUS.SERVER_ERROR).send();
 		}
-		return res.status(204).send();
+		return res.status(STATUS.NO_CONTENT).send();
 	});
 });
 

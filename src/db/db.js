@@ -43,7 +43,7 @@ module.exports = function() {
   const Template = mongoose.model('Template', TEMPLATE_SCHEMA)
 
   const PRESENTATION_SCHEMA = mongoose.Schema({
-    slide: String,
+    slides: String,
     title: String,
     date: Date
   });
