@@ -91,7 +91,6 @@ router.post('/', upload.single('template'), (req, res) => {
             const templateWidth = template['$']['width'];
             const slides = template.slides[0]['RVDisplaySlide'];
             for (let i = 0; i < slides.length; i++) {
-              console.log(i);
               let slide = slides[i];
               let title = slide['$']['label'] || 'Template ' + (i+1);
               let text = slide['displayElements'][0]['RVTextElement'][0];
@@ -100,7 +99,6 @@ router.post('/', upload.single('template'), (req, res) => {
               for (let i = 0; i < bg.length; i++) {
                 bg[i] = parseInt(bg[i]*255);
               }
-              console.log(slide);
 
               rtf.string(ProPresenter.decode(text['$'].RTFData), (err, rtfText) => {
                 let c = rtfText.content[0].style.foreground; // color
