@@ -9,6 +9,7 @@ const hash = require('../../../../utils/hash');
 const flash = require('connect-flash');
 const User = mongoose.model('User');
 const Session = mongoose.model('Session');
+const STATUS = require('../../../status');
 
 passport.use(new LocalStrategy(
   function(username, password, cb) {
@@ -87,36 +88,29 @@ passport.use(new FacebookStrategy({
 
 router.use(passport.initialize());
 
-// router.use(function (req, res, next) {
-//   if (req.url === '/auth/login/') {
-//     next();
-//     return;
-//   }
-// 
-//   // TODO: implement auth middleware
-//   console.log('should really do auth!')
-//   next();
-//   
-//   
-//   var token = req.headers['x-token'];
-// 
-//   // if (token) {
-//   // 	for (var i = 0; i < accessTokens.length; i++) {
-//   // 		
-//   // 		if (accessTokens[i].token == token) {
-//   // 			next();
-//   // 			return;
-//   // 		}
-//   // 	};
-//   // 	fail();
-//   // } else {
-//   // 	fail();
-//   // }
-//  
-//   function fail() {
-//     res.status(401).send('Unauthorised');
-//   }
-//   
-// });
+router.use(function (req, res, next) {
+  if (req.url === '/auth/login/') {
+    next();
+    return;
+  }
+
+  var token = req.headers['x-token'];
+  console.log(token);
+
+  if (token) {
+    Session.find({'token': token}, (err, session) => {
+      if (err || session.length != 1) 
+        fail();
+      next();
+    })
+  } else {
+  	fail();
+  }
+ 
+  function fail() {
+    res.status(STATUS.FORBIDDEN).send('Unauthorised');
+  }
+  
+});
 
 module.exports = router;
