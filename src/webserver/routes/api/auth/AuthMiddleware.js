@@ -86,8 +86,7 @@ passport.use(new FacebookStrategy({
 router.use(passport.initialize());
 
 router.use(function (req, res, next) {
-  console.log('url',req.url)
-  if (req.url == '/auth') {
+  if ((req.url == '/auth') || (req.url = '/users')) {
     next();
     return;
   }
