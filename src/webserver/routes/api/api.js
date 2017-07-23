@@ -8,13 +8,13 @@ const passport = require('passport');
 
 const router = require('express').Router();
 
-const AuthMiddleware = require('./auth/AuthMiddleware');
-router.use(AuthMiddleware);
-
 const cors = require('cors');
 router.use(cors({
   origin: CORS_WHITELIST
 }));
+
+const AuthMiddleware = require('./auth/AuthMiddleware');
+router.use(AuthMiddleware);
 
 const bodyParser = require('body-parser');
 router.use(bodyParser.json());
