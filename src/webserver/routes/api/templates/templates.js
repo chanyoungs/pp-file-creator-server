@@ -70,7 +70,6 @@ router.get('/:template_id', (req, res) => {
 });
 
 router.post('/', upload.single('template'), (req, res) => {
-// console.log(req.file, req.body)
   if (typeof(req.file) == 'undefined') {
     return res.status(STATUS.BAD_REQUEST).send('send zip, also check content-type');
   }

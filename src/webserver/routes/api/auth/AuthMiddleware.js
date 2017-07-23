@@ -86,19 +86,18 @@ passport.use(new FacebookStrategy({
 router.use(passport.initialize());
 
 router.use(function (req, res, next) {
-  if ((req.url == '/auth') || (req.url = '/users')) {
-    next();
-    return;
-  }
-
   var token = req.headers['x-token'];
 
+  if ((req.url == '/auth') || (req.url == '/users')) {
+    return next();
+  }
+  
   if (token) {
     Session.find({'token': token}, (err, session) => {
       if (err || session.length != 1) {
         return fail();
       }
-      next();
+      return next();
     })
   } else {
   	return fail();
@@ -107,7 +106,6 @@ router.use(function (req, res, next) {
   function fail() {
     return res.status(STATUS.UNAUTHORISED).send('Unauthorised');
   }
-  
 });
 
 module.exports = router;
