@@ -60,8 +60,8 @@ passport.deserializeUser(function(token, cb) {
 passport.use(new FacebookStrategy({
     clientID: process.env.FBAppId,
     clientSecret: process.env.FBAppSecret,
-    // callbackURL: process.env.FBCallbackUrl
-    callbackURL: 'http://localhost:3000/api/v1/auth/facebook/callback/'
+    callbackURL: process.env.FBCallbackUrl
+    // callbackURL: 'http://localhost:3000/api/v1/auth/facebook/callback/'
   },
   (accessToken, refreshToken, profile, cb) => {
     // console.log('a ', accessToken);
@@ -80,35 +80,33 @@ passport.use(new FacebookStrategy({
         return cb(err, user);
       }
     })
-    // User.findOrCreate({ facebookId: profile.id }, function (err, user) {
-      // return cb(err, user);
-    // });
   }
 ));
 
 router.use(passport.initialize());
 
 router.use(function (req, res, next) {
-  if (req.url === '/auth/login/') {
+  console.log('url',req.url)
+  if (req.url == '/auth') {
     next();
     return;
   }
 
   var token = req.headers['x-token'];
-  console.log(token);
 
   if (token) {
     Session.find({'token': token}, (err, session) => {
-      if (err || session.length != 1) 
-        fail();
+      if (err || session.length != 1) {
+        return fail();
+      }
       next();
     })
   } else {
-  	fail();
+  	return fail();
   }
  
   function fail() {
-    res.status(STATUS.FORBIDDEN).send('Unauthorised');
+    return res.status(STATUS.UNAUTHORISED).send('Unauthorised');
   }
   
 });
