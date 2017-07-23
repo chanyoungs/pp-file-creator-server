@@ -55,10 +55,4 @@ router.delete('/sessions/all', (req, res) => {
   return res.status(200).send();
 })
 
-router.post('/parse', (req, res) => {
-  const { toRtfData } = require('../../../utils/draftjs')
-  var data = toRtfData(req.body.state)
-  res.status(201).send(data);
-});
-
 module.exports = router;

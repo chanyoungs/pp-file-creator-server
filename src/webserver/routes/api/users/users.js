@@ -14,7 +14,7 @@ const router = require('express').Router();
 const mongoose = require('mongoose'); 
 const crypto = require('crypto');
 const hash = require('../../../../utils/hash');
-
+const STATUS = require('../../../status')
 
 const User = mongoose.model('User');
 
