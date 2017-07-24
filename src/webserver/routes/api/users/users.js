@@ -45,9 +45,16 @@ router.post('/', (req, res) => {
   // TODO: check the user doesn't already exist
   user.save((err, user) => {
     if (err) {
-      return res.status(STATUS.SERVER_ERROR).send({
-        success: false
-      });
+      if (typeof(err['errors']) != 'undefined') {
+        // TODO: make this cleaner
+        if (err['errors']['username'] && err['errors']['username']['kind'] == 'unique') {
+          res.status(STATUS.CONFLICT).json(err['errors']);
+        }
+      } else {
+        return res.status(STATUS.SERVER_ERROR).send({
+          success: false,
+        });
+      }
     }
     
     return res.status(STATUS.CREATED).json({

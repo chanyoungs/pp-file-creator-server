@@ -3,6 +3,8 @@ module.exports = function() {
   
   
   const mongoose = require('mongoose');
+  const uniqueValidator = require('mongoose-unique-validator');
+
   mongoose.Promise = global.Promise;
   
   mongoose.connect(DB_URI);
@@ -52,13 +54,20 @@ module.exports = function() {
   const Presentation = mongoose.model('Presentation', PRESENTATION_SCHEMA)
   
   const USER_SCHEMA = mongoose.Schema({
-    username: String,
+    username: {
+      type: String, 
+      lowercase: true,
+      unique: true
+    },
     password: String,
     facebookId: String,
-    email: String,
+    email: {
+      type: String,
+      lowercase: true
+    },
     salt: String
   });
-  
+  USER_SCHEMA.plugin(uniqueValidator);
   const User = mongoose.model('User', USER_SCHEMA)
   
   const SESSION_SCHEMA = mongoose.Schema({
@@ -73,7 +82,9 @@ module.exports = function() {
     user: String,
     path: String,
     filename: String,
-    mimetype: String
+    key: String,
+    mimetype: String,
+    size: String
   });
   
   const S3 = mongoose.model('S3', S3_SCHEMA)

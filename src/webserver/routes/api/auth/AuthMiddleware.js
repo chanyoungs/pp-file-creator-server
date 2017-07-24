@@ -86,7 +86,6 @@ passport.use(new FacebookStrategy({
 router.use(passport.initialize());
 
 router.use(function (req, res, next) {
-  console.log(req.query)
   var token = req.headers['x-token'] || req.query.token;
 
   if ((req.url == '/auth') || (req.url == '/users')) {
@@ -94,9 +93,17 @@ router.use(function (req, res, next) {
   }
   
   if (token) {
-    Session.find({'token': token}, (err, session) => {
-      if (err || session.length != 1) {
+    Session.find({'token': token}, (err, s) => {
+      var session = s[0]
+
+      if (err || s.length != 1) {
         return fail();
+      }
+      req.user = {
+        username: session.username,
+        token: session.token,
+        created: session.created,
+        id: session._id
       }
       return next();
     })

@@ -1,13 +1,28 @@
 const router = require('express').Router();
 
+const AWS = require('aws-sdk')
+var awsS3 = new AWS.S3({apiVersion: '2006-03-01'});
+
 const multer = require('multer');
-const upload = multer({ dest: '/files/' });
+const multerS3 = require('multer-s3');
+const upload = multer({ 
+  storage: multerS3({
+    s3: awsS3,
+    bucket: process.env.AWS_BUCKET,
+    metadata: function (req, file, cb) {
+      cb(null, {fieldName: file.fieldname});
+    },
+    key: function (req, file, cb) {
+      cb(null, Date.now().toString())
+    }
+  })
+});
 
 const mongoose = require('mongoose');
 const STATUS = require('../../../status');
 const S3 = mongoose.model('S3');
 const path = require('path');
-// const fs = require('fs');
+
 
 router.get('/', (req, res) => {
   S3.find((err, s3) => {
@@ -19,14 +34,25 @@ router.get('/', (req, res) => {
 })
 
 router.get('/:file_id', (req, res) => {
-  S3.find({_id: req.params.file_id}, (err, doc) => {
+  console.log('#')
+  S3.findById(req.params.file_id, (err, doc) => {
     if (err) {
+      console.log('no file');
       res.status(STATUS.SERVER_ERROR).json({success: false})
     }
+    
+    let options = {
+      Bucket: process.env.AWS_BUCKET,
+      Key: doc.key
+    }
+    
     res.set({
       'Content-Type': doc.mimetype
     })
-    res.status(STATUS.OK).sendFile(doc[0].path);
+    console.log('###')
+    var fileStream = awsS3.getObject(options).createReadStream();
+    console.log('#####')
+    fileStream.pipe(res);
   })
 })
 
@@ -47,13 +73,16 @@ router.post('/', upload.single('file'), (req, res) => {
       success: false
     });
   }
-  console.log(req.file)
-  // TODO: get user from access token or req.user
+
+  console.log('##', req.file);
+  
   var s3 = new S3({
-    user: 'testy',
-    path: req.file.path,
-    filename: req.file.filename,
-    mimetype: req.file.mimetype
+    user: req.user.username,
+    path: req.file.location,
+    key: req.file.key,
+    filename: req.file.originalname,
+    mimetype: req.file.mimetype,
+    size: req.file.size
   });
   s3.save((err, doc) => {
     res.status(STATUS.OK).json(doc);

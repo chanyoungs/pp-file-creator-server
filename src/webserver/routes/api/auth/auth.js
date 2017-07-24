@@ -13,6 +13,7 @@ router.use('/facebook', facebook);
 router.post('/', (req, res, next) => {
   passport.authenticate('local', (err, user, info, status) => {
     if (err) { return next(err) }
+
     // console.log('e ', err)
     // console.log('u ', user)
     // console.log('i ', info)
