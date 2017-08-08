@@ -1,4 +1,4 @@
-const API_URL = 'https://familycentre.org.au/cfcapp/search/?json=true';
+const API_URL = 'https://www.familycentre.org.au/cfcapp/search/?json=true';
 const REQUEST_CACHE_DIR = '/tmp/request-cache';
 
 
@@ -10,8 +10,9 @@ const STATUS = require('../../../status');
 cachedRequest.setCacheDirectory(REQUEST_CACHE_DIR);
 
 router.get('/', (req, res) => {
-  let url = API_URL + '&' + 'v=' + req.query['v'] + '&ref=' + req.query['ref'];
 
+  let url = API_URL + '&' + 'v=' + encodeURI(req.query['v']) + '&ref=' + encodeURI(req.query['ref']);
+  console.log(url);
   cachedRequest({
     url: url,
     ttl: 1440000

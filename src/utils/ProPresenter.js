@@ -72,6 +72,9 @@ class ProPresenter {
       /<\/(?:b|strong|i|em|u|ins|strike|del|sup|sub)(?:\s+[^>]*)?>/ig,
       "\n}");
 
+
+    richText = richText.replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');
+    richText = richText.replace(/[\u2013\u2014]/g, '-') .replace(/[\u2026]/g, '...')
     // Strip any other remaining HTML tags [but leave their contents]
     richText = richText.replace(/<(?:[^>]+)>/g, "");
 

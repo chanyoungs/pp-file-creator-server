@@ -230,20 +230,20 @@ function BuildPro5Document(file, template) {
       fs.readFile('./src/tempPP/ImageSlide.json', 'utf-8', (err, data) => {
         const BASE_IMAGE_SLIDE = JSON.parse(data);
         slidesGroup = [];
-        
+        var slidePos = 0;
         for (var i = 0; i < file.slides.length; i++) {
           const slide = file.slides[i];
           let proSlide = undefined;
           
           if (slide.type == 'TEXT_SLIDE') {
-            proSlide = createTextSlide(slide, i, BASE_SLIDE);
+            proSlide = createTextSlide(slide, slidePos, BASE_SLIDE);
           } else if (slide.type == 'IMAGE_SLIDE') {
             images.push(slide.image)
-            proSlide = createImageSlide(slide, i, BASE_IMAGE_SLIDE);
+            proSlide = createImageSlide(slide, slidePos, BASE_IMAGE_SLIDE);
           } else {
             continue;
           }
-          
+          slidePos++;
           slidesGroup.push(proSlide);
           
         }
@@ -273,6 +273,7 @@ function createTextSlide(slide, position, baseSlide) {
 
   let proSlide = copyObj(baseSlide);
   rtfData = rtfStart + rtfData + '}';
+
   rtfEncoded = ProPresenter.encode(rtfData);
 
   proSlide['$']['sort_index'] = position;
